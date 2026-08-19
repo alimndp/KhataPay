@@ -3,7 +3,7 @@ name: Flutter Android Build & Release
 on:
   push:
     branches:
-      - main  # Triggers the build when code is pushed to main
+      - main
 
 jobs:
   build:
@@ -23,19 +23,22 @@ jobs:
       - name: Set up Flutter Environment
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable' # Uses the latest stable Flutter SDK
-          cache: true       # Caches packages to make subsequent builds faster
+          channel: 'stable'
+          cache: true
 
+      # 📁 Added working-directory pointing to your nested folder
       - name: Install Project Dependencies
-        run: flutter pub get
+        working-directory: ./KhataPay 
+        run: |
+          flutter clean
+          flutter pub get
 
-      # Optional: Uncomment the line below if you use code generation (like build_runner)
-      # - name: Run Code Generation
-      #   run: flutter pub run build_runner build --delete-conflicting-outputs
-
+      # 📁 Added working-directory and run clean before building
       - name: Build Release APK
+        working-directory: ./KhataPay
         run: flutter build apk --release
 
+       Caviar Tagging Step
       - name: Generate Unique Version Tag
         id: tag
         run: echo "VERSION_TAG=v$(date +'%Y.%m.%d-%H%M%S')" >> $GITHUB_ENV
@@ -47,7 +50,7 @@ jobs:
           name: Flutter Release ${{ env.VERSION_TAG }}
           draft: false
           prerelease: false
-          # Path where Flutter outputs the final release APK
-          files: build/app/outputs/flutter-apk/app-release.apk
+          # Updated file path to match your nested structure
+          files: KhataPay/build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
