@@ -1,0 +1,53 @@
+name: Flutter Android Build & Release
+
+on:
+  push:
+    branches:
+      - main  # Triggers the build when code is pushed to main
+
+jobs:
+  build:
+    name: Build Flutter APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Repository Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java Development Kit (JDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter Environment
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable' # Uses the latest stable Flutter SDK
+          cache: true       # Caches packages to make subsequent builds faster
+
+      - name: Install Project Dependencies
+        run: flutter pub get
+
+      # Optional: Uncomment the line below if you use code generation (like build_runner)
+      # - name: Run Code Generation
+      #   run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      - name: Generate Unique Version Tag
+        id: tag
+        run: echo "VERSION_TAG=v$(date +'%Y.%m.%d-%H%M%S')" >> $GITHUB_ENV
+
+      - name: Create GitHub Release and Upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION_TAG }}
+          name: Flutter Release ${{ env.VERSION_TAG }}
+          draft: false
+          prerelease: false
+          # Path where Flutter outputs the final release APK
+          files: build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
