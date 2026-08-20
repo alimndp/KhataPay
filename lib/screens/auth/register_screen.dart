@@ -54,10 +54,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         context,
         'Account created! Please check your email to verify.',
       );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+      // Defer navigation to avoid Flutter web DOM race condition
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
+      });
     } catch (e) {
       if (!mounted) return;
       showSnackBar(context, 'Registration failed: ${e.toString()}',

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Allow manual trigger
 
 jobs:
   build:
@@ -26,19 +27,14 @@ jobs:
           channel: 'stable'
           cache: true
 
-      # 📁 Added working-directory pointing to your nested folder
       - name: Install Project Dependencies
-        working-directory: ./KhataPay 
         run: |
           flutter clean
           flutter pub get
 
-      # 📁 Added working-directory and run clean before building
       - name: Build Release APK
-        working-directory: ./KhataPay
         run: flutter build apk --release
 
-       Caviar Tagging Step
       - name: Generate Unique Version Tag
         id: tag
         run: echo "VERSION_TAG=v$(date +'%Y.%m.%d-%H%M%S')" >> $GITHUB_ENV
@@ -47,10 +43,33 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION_TAG }}
-          name: Flutter Release ${{ env.VERSION_TAG }}
+          name: KhataPay Release ${{ env.VERSION_TAG }}
+          body: |
+            ## KhataPay - Business Management App
+            
+            ### Features
+            - 👥 Employee Management
+            - 📅 Attendance Tracking
+            - 💰 Salary Disbursement with UPI Payment
+            - 📊 Account Module (Income/Expense/Reports)
+            - 🔐 Role-Based Access
+            
+            ### Download
+            - APK: `app-release.apk`
+            
+            ### Installation
+            1. Download the APK
+            2. Enable "Install from unknown sources" on your device
+            3. Install and open KhataPay
           draft: false
           prerelease: false
-          # Updated file path to match your nested structure
-          files: KhataPay/build/app/outputs/flutter-apk/app-release.apk
+          files: build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: khatapay-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
