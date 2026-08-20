@@ -28,7 +28,7 @@ dependencies:
   printing: ^5.11.0
   csv: ^5.1.1
   path_provider: ^2.1.0
-  share_plus: ^7.2.0
+  share_plus: ^10.0.0
   image_picker: ^1.0.5
   cached_network_image: ^3.3.0
 
